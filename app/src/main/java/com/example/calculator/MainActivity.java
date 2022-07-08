@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -128,8 +129,8 @@ public class MainActivity extends AppCompatActivity {
         if (isEqualsClicked)
         {
             vModel.setOperations(mainText.getText().toString());
+            vModel.setPreviousNum(Double.parseDouble(mainText.getText().toString()));
             vModel.setMainText("0");
-            vModel.setPreviousNum(0);
             vModel.setIsEqualsClicked(false);
         }
         if (operationsText.getText().toString().length() == 0)
@@ -153,11 +154,11 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < operationsText.getText().toString().length(); i++)
         {
-            if (operationsText.getText().toString().charAt(i) == '+' || operationsText.getText().toString().charAt(i) == '-'
+            if (operationsText.getText().toString().charAt(i) == '+' || operationsText.getText().toString().charAt(i) == '―'
                     || operationsText.getText().toString().charAt(i) == '÷' || operationsText.getText().toString().charAt(i) == '×')
             {
                 if (i != 0)
-                    if (operationsText.getText().toString().charAt(i-1) != '+' || operationsText.getText().toString().charAt(i-1) != '-'
+                    if (operationsText.getText().toString().charAt(i-1) != '+' || operationsText.getText().toString().charAt(i-1) != '―'
                             || operationsText.getText().toString().charAt(i-1) != '÷' || operationsText.getText().toString().charAt(i-1) != '×')
                         op.append(operationsText.getText().toString().charAt(i));
                 else num.append(operationsText.getText().toString().charAt(i));
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             case "+":
                 result = result + Double.parseDouble(mainText.getText().toString());
                 break;
-            case "-":
+            case "―":
                 result = result - Double.parseDouble(mainText.getText().toString());
                 break;
             case "÷":
@@ -196,62 +197,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onEqualsClick(View view) {
-        if (operationsText.getText().toString().equals(""))
+        if (operationsText.getText().toString().equals("") || isEqualsClicked)
             return;
-
-        if (previousNum != 0)
-            vModel.setOperations(operationsText.getText().toString().replace(String.valueOf(previousNum), mainText.getText().toString()));
 
         StringBuilder num = new StringBuilder();
         StringBuilder op = new StringBuilder();
 
-        String prev = "";
-        if (previousNum == 0)
-            for (int i = 0; i < operationsText.getText().toString().length(); i++)
+        for (int i = 0; i < operationsText.getText().toString().length(); i++)
+        {
+            if (operationsText.getText().toString().charAt(i) == '+' || operationsText.getText().toString().charAt(i) == '―'
+                    || operationsText.getText().toString().charAt(i) == '÷' || operationsText.getText().toString().charAt(i) == '×')
             {
-                if (operationsText.getText().toString().charAt(i) == '+' || operationsText.getText().toString().charAt(i) == '-'
-                        || operationsText.getText().toString().charAt(i) == '÷' || operationsText.getText().toString().charAt(i) == '×')
-                {
-                    if (i != 0)
-                        if (operationsText.getText().toString().charAt(i-1) != '+' || operationsText.getText().toString().charAt(i-1) != '-'
-                                || operationsText.getText().toString().charAt(i-1) != '÷' || operationsText.getText().toString().charAt(i-1) != '×')
-                        {
-                            op.append(operationsText.getText().toString().charAt(i)); prev = num.toString();
-                        }
-                    else num.append(operationsText.getText().toString().charAt(i));
-                }
-                else num.append(operationsText.getText().toString().charAt(i));
-            }
-        else
-            for (int i = 0; i < operationsText.getText().toString().length(); i++)
-            {
-                if (operationsText.getText().toString().charAt(i) == '+' || operationsText.getText().toString().charAt(i) == '-'
-                        || operationsText.getText().toString().charAt(i) == '÷' || operationsText.getText().toString().charAt(i) == '×')
-                {
-                    if (i != 0)
-                        if (operationsText.getText().toString().charAt(i-1) != '+' || operationsText.getText().toString().charAt(i-1) != '-'
-                                || operationsText.getText().toString().charAt(i-1) != '÷' || operationsText.getText().toString().charAt(i-1) != '×')
-                        {
-                            op.append(operationsText.getText().toString().charAt(i));
-                            prev = num.toString();
-                            num.setLength(0); }
-                    else
+                if (i != 0)
+                    if (operationsText.getText().toString().charAt(i-1) != '+' || operationsText.getText().toString().charAt(i-1) != '―'
+                            || operationsText.getText().toString().charAt(i-1) != '÷' || operationsText.getText().toString().charAt(i-1) != '×')
                     {
-                        num.append(operationsText.getText().toString().charAt(i));
+                            op.append(operationsText.getText().toString().charAt(i));
                     }
-                }
                 else num.append(operationsText.getText().toString().charAt(i));
             }
+            else num.append(operationsText.getText().toString().charAt(i));
+        }
 
         String number = num.toString();
         number = number.replace("=", "");
         String operation = op.toString();
         double result = Double.parseDouble(number);
+
         switch (operation) {
             case "+":
                 result = result + Double.parseDouble(mainText.getText().toString());
                 break;
-            case "-":
+            case "―":
                 result = result - Double.parseDouble(mainText.getText().toString());
                 break;
             case "÷":
@@ -261,9 +238,7 @@ public class MainActivity extends AppCompatActivity {
                 result = result * Double.parseDouble(mainText.getText().toString());
                 break;
         }
-        if (previousNum == 0)
-            vModel.setOperations(String.format("%s%s=", operationsText.getText().toString(), mainText.getText().toString()));
-        vModel.setPreviousNum(Double.parseDouble(prev));
+        vModel.setOperations(String.format("%s%s=", operationsText.getText().toString(), mainText.getText().toString()));
         if(result % 1 == 0) {
             vModel.setMainText(String.valueOf((int)result));
         }
